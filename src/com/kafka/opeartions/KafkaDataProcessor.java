@@ -11,31 +11,35 @@ import com.kafka.constant.AppConstant;
 import com.kafka.model.Result;
 import com.sentiment.SentimentAnalysis;
 
-public class ConsumerGroup {
+public class KafkaDataProcessor implements Runnable{
+	
+	private Result result;
+	public KafkaDataProcessor(Result result){
+		this.result = result;
+	}
+	
 	@SuppressWarnings("all")
-	public static void main(String[] args) {
+
+	public void processDataFromKafka() {
 		String topic = "topic-tweet-data";
-		//TODO remove the warning
+		// TODO remove the warning
 		KafkaConsumer<String, String> consumer = new KafkaConsumer<String, String>(setProperties());
 		consumer.subscribe(Arrays.asList(topic));
 		System.out.println("Subscribed to topic " + topic);
-
 		int positiveSentiment = 0;
 		int negativeSentiment = 0;
-		Result result = new Result();
 		while (true) {
 			ConsumerRecords<String, String> records = consumer.poll(100);
 			for (ConsumerRecord<String, String> record : records) {
 				String text = record.value();
-				System.out.println("Statement :"+text);
+				System.out.println("Statement :" + text);
 				SentimentAnalysis.analyze(text, result);
 			}
-			System.out.println("Psoitive Sentiment : "+result.getPositiveSentiment() + "Negative Sentiment :"+result.getNegativeSentiment()+"Neutral Sentiment :"+result.getNeutralSentiment());
+			
 		}
-
 	}
 
-	private static Properties setProperties() {		
+	private Properties setProperties() {
 		String group = "checkdata";
 		Properties props = new Properties();
 		props.put("bootstrap.servers", AppConstant.KAFKA_SERVER);
@@ -46,5 +50,11 @@ public class ConsumerGroup {
 		props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
 		props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
 		return props;
+	}
+
+	@Override
+	public void run() {
+		System.out.println("******************Kafka thread started**********************");
+		processDataFromKafka();
 	}
 }

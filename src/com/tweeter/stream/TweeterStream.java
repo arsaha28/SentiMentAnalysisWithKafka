@@ -44,6 +44,7 @@ public class TweeterStream {
 	        public void onStatus(Status status) {
 	           	   String message = status.getUser().getName() + " : " + status.getText();
 	           	   String key = String.valueOf(i+1);
+	           	   System.out.println(message);
 	               KeyedMessage<String, String> data = new KeyedMessage<String, String>(AppConstant.TOPIC_NAME,key, message);
 	               producer.send(data);
 	        }
